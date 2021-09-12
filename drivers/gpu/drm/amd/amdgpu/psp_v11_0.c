@@ -689,7 +689,7 @@ static int psp_v11_0_memory_training(struct psp_context *psp, uint32_t ops)
 		}
 
 		if (drm_dev_enter(&adev->ddev, &idx)) {
-			memcpy_fromio(buf, adev->mman.aper_base_kaddr, sz);
+			memcpy_fromio_pcie(buf, adev->mman.aper_base_kaddr, sz);
 			ret = psp_v11_0_memory_training_send_msg(psp, PSP_BL__DRAM_LONG_TRAIN);
 			if (ret) {
 				DRM_ERROR("Send long training msg failed.\n");
@@ -698,7 +698,7 @@ static int psp_v11_0_memory_training(struct psp_context *psp, uint32_t ops)
 				return ret;
 			}
 
-			memcpy_toio(adev->mman.aper_base_kaddr, buf, sz);
+			memcpy_toio_pcie(adev->mman.aper_base_kaddr, buf, sz);
 			adev->hdp.funcs->flush_hdp(adev, NULL);
 			vfree(buf);
 			drm_dev_exit(idx);

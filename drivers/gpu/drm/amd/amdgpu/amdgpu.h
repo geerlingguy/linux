@@ -1145,6 +1145,13 @@ int amdgpu_do_asic_reset(struct list_head *device_list_handle,
 int emu_soc_asic_init(struct amdgpu_device *adev);
 
 /*
+ * memcpy_io and memset_io functions that work on a raspberry pi 4
+ */
+void memcpy_fromio_pcie(void *to, const volatile void __iomem *from, size_t count);
+void memcpy_toio_pcie(volatile void __iomem *to, const void *from, size_t count);
+void memset_io_pcie(volatile void __iomem *dst, int c, size_t count);
+
+/*
  * Registers read & write functions.
  */
 #define AMDGPU_REGS_NO_KIQ    (1<<1)

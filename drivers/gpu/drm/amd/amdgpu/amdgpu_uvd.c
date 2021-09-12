@@ -409,7 +409,7 @@ int amdgpu_uvd_suspend(struct amdgpu_device *adev)
 			if (in_ras_intr)
 				memset(adev->uvd.inst[j].saved_bo, 0, size);
 			else
-				memcpy_fromio(adev->uvd.inst[j].saved_bo, ptr, size);
+				memcpy_fromio_pcie(adev->uvd.inst[j].saved_bo, ptr, size);
 
 			drm_dev_exit(idx);
 		}
@@ -438,7 +438,7 @@ int amdgpu_uvd_resume(struct amdgpu_device *adev)
 
 		if (adev->uvd.inst[i].saved_bo != NULL) {
 			if (drm_dev_enter(&adev->ddev, &idx)) {
-				memcpy_toio(ptr, adev->uvd.inst[i].saved_bo, size);
+				memcpy_toio_pcie(ptr, adev->uvd.inst[i].saved_bo, size);
 				drm_dev_exit(idx);
 			}
 			kvfree(adev->uvd.inst[i].saved_bo);
@@ -451,14 +451,14 @@ int amdgpu_uvd_resume(struct amdgpu_device *adev)
 			if (adev->firmware.load_type != AMDGPU_FW_LOAD_PSP) {
 				offset = le32_to_cpu(hdr->ucode_array_offset_bytes);
 				if (drm_dev_enter(&adev->ddev, &idx)) {
-					memcpy_toio(adev->uvd.inst[i].cpu_addr, adev->uvd.fw->data + offset,
+					memcpy_toio_pcie(adev->uvd.inst[i].cpu_addr, adev->uvd.fw->data + offset,
 						    le32_to_cpu(hdr->ucode_size_bytes));
 					drm_dev_exit(idx);
 				}
 				size -= le32_to_cpu(hdr->ucode_size_bytes);
 				ptr += le32_to_cpu(hdr->ucode_size_bytes);
 			}
-			memset_io(ptr, 0, size);
+			memset_io_pcie(ptr, 0, size);
 			/* to restore uvd fence seq */
 			amdgpu_fence_driver_force_completion(&adev->uvd.inst[i].ring);
 		}

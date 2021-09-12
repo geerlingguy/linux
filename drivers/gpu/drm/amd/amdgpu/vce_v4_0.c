@@ -566,7 +566,7 @@ static int vce_v4_0_suspend(void *handle)
 			unsigned size = amdgpu_bo_size(adev->vce.vcpu_bo);
 			void *ptr = adev->vce.cpu_addr;
 
-			memcpy_fromio(adev->vce.saved_bo, ptr, size);
+			memcpy_fromio_pcie(adev->vce.saved_bo, ptr, size);
 		}
 		drm_dev_exit(idx);
 	}
@@ -592,7 +592,7 @@ static int vce_v4_0_resume(void *handle)
 			unsigned size = amdgpu_bo_size(adev->vce.vcpu_bo);
 			void *ptr = adev->vce.cpu_addr;
 
-			memcpy_toio(ptr, adev->vce.saved_bo, size);
+			memcpy_toio_pcie(ptr, adev->vce.saved_bo, size);
 			drm_dev_exit(idx);
 		}
 	} else {
