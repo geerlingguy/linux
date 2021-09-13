@@ -132,7 +132,7 @@ const char *amdgpu_asic_name[] = {
  *
  * like memcpy_fromio, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
  */
- 
+
 void memcpy_fromio_pcie(void *to, const volatile void __iomem *from, size_t count)
 {
 	while (count && !IS_ALIGNED((unsigned long)from, 8)) {
@@ -162,7 +162,7 @@ void memcpy_fromio_pcie(void *to, const volatile void __iomem *from, size_t coun
  *
  * like memcpy_toio, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
  */
- 
+
 void memcpy_toio_pcie(volatile void __iomem *to, const void *from, size_t count)
 {
 	while (count && !IS_ALIGNED((unsigned long)to, 8)) {
@@ -192,7 +192,7 @@ void memcpy_toio_pcie(volatile void __iomem *to, const void *from, size_t count)
  *
  * like memset_io, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
  */
- 
+
 void memset_io_pcie(volatile void __iomem *dst, int c, size_t count)
 {
 	u32 qc = (u8)c;
