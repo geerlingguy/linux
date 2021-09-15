@@ -316,7 +316,7 @@ int amdgpu_vce_resume(struct amdgpu_device *adev)
 	offset = le32_to_cpu(hdr->ucode_array_offset_bytes);
 
 	if (drm_dev_enter(&adev->ddev, &idx)) {
-		memcpy_toio(cpu_addr, adev->vce.fw->data + offset,
+		memcpy_toio_pcie(cpu_addr, adev->vce.fw->data + offset,
 			    adev->vce.fw->size - offset);
 		drm_dev_exit(idx);
 	}

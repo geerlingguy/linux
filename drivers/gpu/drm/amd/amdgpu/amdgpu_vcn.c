@@ -333,7 +333,7 @@ int amdgpu_vcn_suspend(struct amdgpu_device *adev)
 			return -ENOMEM;
 
 		if (drm_dev_enter(&adev->ddev, &idx)) {
-			memcpy_fromio(adev->vcn.inst[i].saved_bo, ptr, size);
+			memcpy_fromio_pcie(adev->vcn.inst[i].saved_bo, ptr, size);
 			drm_dev_exit(idx);
 		}
 	}
@@ -357,7 +357,7 @@ int amdgpu_vcn_resume(struct amdgpu_device *adev)
 
 		if (adev->vcn.inst[i].saved_bo != NULL) {
 			if (drm_dev_enter(&adev->ddev, &idx)) {
-				memcpy_toio(ptr, adev->vcn.inst[i].saved_bo, size);
+				memcpy_toio_pcie(ptr, adev->vcn.inst[i].saved_bo, size);
 				drm_dev_exit(idx);
 			}
 			kvfree(adev->vcn.inst[i].saved_bo);
@@ -370,14 +370,14 @@ int amdgpu_vcn_resume(struct amdgpu_device *adev)
 			if (adev->firmware.load_type != AMDGPU_FW_LOAD_PSP) {
 				offset = le32_to_cpu(hdr->ucode_array_offset_bytes);
 				if (drm_dev_enter(&adev->ddev, &idx)) {
-					memcpy_toio(adev->vcn.inst[i].cpu_addr, adev->vcn.fw->data + offset,
+					memcpy_toio_pcie(adev->vcn.inst[i].cpu_addr, adev->vcn.fw->data + offset,
 						    le32_to_cpu(hdr->ucode_size_bytes));
 					drm_dev_exit(idx);
 				}
 				size -= le32_to_cpu(hdr->ucode_size_bytes);
 				ptr += le32_to_cpu(hdr->ucode_size_bytes);
 			}
-			memset_io(ptr, 0, size);
+			memset_io_pcie(ptr, 0, size);
 		}
 	}
 	return 0;

@@ -261,7 +261,7 @@ static int psp_sw_init(void *handle)
 		}
 	}
 
-	memset(&boot_cfg_entry, 0, sizeof(boot_cfg_entry));
+	memset_io_pcie(&boot_cfg_entry, 0, sizeof(boot_cfg_entry));
 	if (psp_get_runtime_db_entry(adev,
 				PSP_RUNTIME_ENTRY_TYPE_BOOT_CONFIG,
 				&boot_cfg_entry)) {
@@ -375,7 +375,7 @@ psp_cmd_submit_buf(struct psp_context *psp,
 
 	mutex_lock(&psp->mutex);
 
-	memset(psp->cmd_buf_mem, 0, PSP_CMD_BUFFER_SIZE);
+	memset_io_pcie(psp->cmd_buf_mem, 0, PSP_CMD_BUFFER_SIZE);
 
 	memcpy(psp->cmd_buf_mem, cmd, sizeof(struct psp_gfx_cmd_resp));
 
@@ -654,7 +654,7 @@ static int psp_boot_config_get(struct amdgpu_device *adev, uint32_t *boot_cfg)
 	if (amdgpu_sriov_vf(adev))
 		return 0;
 
-	memset(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
+	memset_io_pcie(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
 
 	cmd->cmd_id = GFX_CMD_ID_BOOT_CFG;
 	cmd->cmd.boot_cfg.sub_cmd = BOOTCFG_CMD_GET;
@@ -676,7 +676,7 @@ static int psp_boot_config_set(struct amdgpu_device *adev, uint32_t boot_cfg)
 	if (amdgpu_sriov_vf(adev))
 		return 0;
 
-	memset(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
+	memset_io_pcie(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
 
 	cmd->cmd_id = GFX_CMD_ID_BOOT_CFG;
 	cmd->cmd.boot_cfg.sub_cmd = BOOTCFG_CMD_SET;
@@ -694,10 +694,10 @@ static int psp_rl_load(struct amdgpu_device *adev)
 	if (psp->rl_bin_size == 0)
 		return 0;
 
-	memset(psp->fw_pri_buf, 0, PSP_1_MEG);
+	memset_io_pcie(psp->fw_pri_buf, 0, PSP_1_MEG);
 	memcpy(psp->fw_pri_buf, psp->rl_start_addr, psp->rl_bin_size);
 
-	memset(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
+	memset_io_pcie(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
 
 	cmd->cmd_id = GFX_CMD_ID_LOAD_IP_FW;
 	cmd->cmd.cmd_load_ip_fw.fw_phy_addr_lo = lower_32_bits(psp->fw_pri_mc_addr);
@@ -993,7 +993,7 @@ int psp_xgmi_initialize(struct psp_context *psp)
 
 	/* Initialize XGMI session */
 	xgmi_cmd = (struct ta_xgmi_shared_memory *)(psp->xgmi_context.xgmi_shared_buf);
-	memset(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
+	memset_io_pcie(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
 	xgmi_cmd->cmd_id = TA_COMMAND_XGMI__INITIALIZE;
 
 	ret = psp_xgmi_invoke(psp, xgmi_cmd->cmd_id);
@@ -1007,7 +1007,7 @@ int psp_xgmi_get_hive_id(struct psp_context *psp, uint64_t *hive_id)
 	int ret;
 
 	xgmi_cmd = (struct ta_xgmi_shared_memory *)psp->xgmi_context.xgmi_shared_buf;
-	memset(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
+	memset_io_pcie(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
 
 	xgmi_cmd->cmd_id = TA_COMMAND_XGMI__GET_HIVE_ID;
 
@@ -1027,7 +1027,7 @@ int psp_xgmi_get_node_id(struct psp_context *psp, uint64_t *node_id)
 	int ret;
 
 	xgmi_cmd = (struct ta_xgmi_shared_memory *)psp->xgmi_context.xgmi_shared_buf;
-	memset(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
+	memset_io_pcie(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
 
 	xgmi_cmd->cmd_id = TA_COMMAND_XGMI__GET_NODE_ID;
 
@@ -1055,7 +1055,7 @@ int psp_xgmi_get_topology_info(struct psp_context *psp,
 		return -EINVAL;
 
 	xgmi_cmd = (struct ta_xgmi_shared_memory *)psp->xgmi_context.xgmi_shared_buf;
-	memset(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
+	memset_io_pcie(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
 
 	/* Fill in the shared memory with topology information as input */
 	topology_info_input = &xgmi_cmd->xgmi_in_message.get_topology_info;
@@ -1099,7 +1099,7 @@ int psp_xgmi_set_topology_info(struct psp_context *psp,
 		return -EINVAL;
 
 	xgmi_cmd = (struct ta_xgmi_shared_memory *)psp->xgmi_context.xgmi_shared_buf;
-	memset(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
+	memset_io_pcie(xgmi_cmd, 0, sizeof(struct ta_xgmi_shared_memory));
 
 	topology_info_input = &xgmi_cmd->xgmi_in_message.get_topology_info;
 	xgmi_cmd->cmd_id = TA_COMMAND_XGMI__SET_TOPOLOGY_INFO;
@@ -1283,7 +1283,7 @@ int psp_ras_enable_features(struct psp_context *psp,
 		return -EINVAL;
 
 	ras_cmd = (struct ta_ras_shared_memory *)psp->ras.ras_shared_buf;
-	memset(ras_cmd, 0, sizeof(struct ta_ras_shared_memory));
+	memset_io_pcie(ras_cmd, 0, sizeof(struct ta_ras_shared_memory));
 
 	if (enable)
 		ras_cmd->cmd_id = TA_RAS_COMMAND__ENABLE_FEATURES;
@@ -1408,7 +1408,7 @@ int psp_ras_trigger_error(struct psp_context *psp,
 		return -EINVAL;
 
 	ras_cmd = (struct ta_ras_shared_memory *)psp->ras.ras_shared_buf;
-	memset(ras_cmd, 0, sizeof(struct ta_ras_shared_memory));
+	memset_io_pcie(ras_cmd, 0, sizeof(struct ta_ras_shared_memory));
 
 	ras_cmd->cmd_id = TA_RAS_COMMAND__TRIGGER_ERROR;
 	ras_cmd->ras_in_message.trigger_error = *info;
@@ -1875,7 +1875,7 @@ int psp_rap_invoke(struct psp_context *psp, uint32_t ta_cmd_id, enum ta_rap_stat
 
 	rap_cmd = (struct ta_rap_shared_memory *)
 		  psp->rap_context.rap_shared_buf;
-	memset(rap_cmd, 0, sizeof(struct ta_rap_shared_memory));
+	memset_io_pcie(rap_cmd, 0, sizeof(struct ta_rap_shared_memory));
 
 	rap_cmd->cmd_id = ta_cmd_id;
 	rap_cmd->validation_method_id = METHOD_A;
@@ -1921,7 +1921,7 @@ static int psp_securedisplay_load(struct psp_context *psp)
 	if (!cmd)
 		return -ENOMEM;
 
-	memset(psp->fw_pri_buf, 0, PSP_1_MEG);
+	memset_io_pcie(psp->fw_pri_buf, 0, PSP_1_MEG);
 	memcpy(psp->fw_pri_buf, psp->ta_securedisplay_start_addr, psp->ta_securedisplay_ucode_size);
 
 	psp_prep_ta_load_cmd_buf(cmd,
@@ -2299,7 +2299,7 @@ static int psp_prep_load_ip_fw_cmd_buf(struct amdgpu_firmware_info *ucode,
 	int ret;
 	uint64_t fw_mem_mc_addr = ucode->mc_addr;
 
-	memset(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
+	memset_io_pcie(cmd, 0, sizeof(struct psp_gfx_cmd_resp));
 
 	cmd->cmd_id = GFX_CMD_ID_LOAD_IP_FW;
 	cmd->cmd.cmd_load_ip_fw.fw_phy_addr_lo = lower_32_bits(fw_mem_mc_addr);
@@ -2514,7 +2514,7 @@ static int psp_load_fw(struct amdgpu_device *adev)
 	if (ret)
 		goto failed;
 
-	memset(psp->fence_buf, 0, PSP_FENCE_BUFFER_SIZE);
+	memset_io_pcie(psp->fence_buf, 0, PSP_FENCE_BUFFER_SIZE);
 
 	ret = psp_ring_init(psp, PSP_RING_TYPE__KM);
 	if (ret) {
@@ -2862,7 +2862,7 @@ int psp_ring_cmd_submit(struct psp_context *psp,
 	}
 
 	/* Initialize KM RB frame */
-	memset(write_frame, 0, sizeof(struct psp_gfx_rb_frame));
+	memset_io_pcie(write_frame, 0, sizeof(struct psp_gfx_rb_frame));
 
 	/* Update KM RB frame */
 	write_frame->cmd_buf_addr_hi = upper_32_bits(cmd_buf_mc_addr);
@@ -3261,7 +3261,7 @@ static ssize_t psp_usbc_pd_fw_sysfs_write(struct device *dev,
 	if (ret)
 		goto rel_buf;
 
-	memcpy_toio(cpu_addr, usbc_pd_fw->data, usbc_pd_fw->size);
+	memcpy_toio_pcie(cpu_addr, usbc_pd_fw->data, usbc_pd_fw->size);
 
 	/*
 	 * x86 specific workaround.
@@ -3297,7 +3297,7 @@ void psp_copy_fw(struct psp_context *psp, uint8_t *start_addr, uint32_t bin_size
 	if (!drm_dev_enter(&psp->adev->ddev, &idx))
 		return;
 
-	memset(psp->fw_pri_buf, 0, PSP_1_MEG);
+	memset_io_pcie(psp->fw_pri_buf, 0, PSP_1_MEG);
 	memcpy(psp->fw_pri_buf, start_addr, bin_size);
 
 	drm_dev_exit(idx);

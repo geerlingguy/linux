@@ -1099,6 +1099,9 @@ static struct ttm_tt *amdgpu_ttm_tt_create(struct ttm_buffer_object *bo,
 	else
 		caching = ttm_cached;
 
+	// Test disabling cache entirely.
+	caching = ttm_uncached;
+
 	/* allocate space for the uninitialized page entries */
 	if (ttm_sg_tt_init(&gtt->ttm, bo, page_flags, caching)) {
 		kfree(gtt);

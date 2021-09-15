@@ -3827,7 +3827,7 @@ static int gfx_v10_0_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 
 	gpu_addr = adev->wb.gpu_addr + (index * 4);
 	adev->wb.wb[index] = cpu_to_le32(0xCAFEDEAD);
-	memset(&ib, 0, sizeof(ib));
+	memset_io_pcie(&ib, 0, sizeof(ib));
 	r = amdgpu_ib_get(adev, NULL, 16,
 					AMDGPU_IB_POOL_DIRECT, &ib);
 	if (r)
@@ -4438,7 +4438,7 @@ static int gfx_v10_0_mec_init(struct amdgpu_device *adev)
 			return r;
 		}
 
-		memset(hpd, 0, mec_hpd_size);
+		memset_io_pcie(hpd, 0, mec_hpd_size);
 
 		amdgpu_bo_kunmap(adev->gfx.mec.hpd_eop_obj);
 		amdgpu_bo_unreserve(adev->gfx.mec.hpd_eop_obj);
@@ -5488,7 +5488,7 @@ static void gfx_v10_0_rlc_backdoor_autoload_copy_ucode(struct amdgpu_device *ade
 	memcpy(ptr + toc_offset, fw_data, fw_size);
 
 	if (fw_size < toc_fw_size)
-		memset(ptr + toc_offset + fw_size, 0, toc_fw_size - fw_size);
+		memset_io_pcie(ptr + toc_offset + fw_size, 0, toc_fw_size - fw_size);
 }
 
 static void gfx_v10_0_rlc_backdoor_autoload_copy_toc_ucode(struct amdgpu_device *adev)
@@ -6643,7 +6643,7 @@ static int gfx_v10_0_gfx_init_queue(struct amdgpu_ring *ring)
 	int mqd_idx = ring - &adev->gfx.gfx_ring[0];
 
 	if (!amdgpu_in_reset(adev) && !adev->in_suspend) {
-		memset((void *)mqd, 0, sizeof(*mqd));
+		memset_io_pcie((void *)mqd, 0, sizeof(*mqd));
 		mutex_lock(&adev->srbm_mutex);
 		nv_grbm_select(adev, ring->me, ring->pipe, ring->queue, 0);
 		gfx_v10_0_gfx_mqd_init(ring);
@@ -7022,7 +7022,7 @@ static int gfx_v10_0_kiq_init_queue(struct amdgpu_ring *ring)
 		nv_grbm_select(adev, 0, 0, 0, 0);
 		mutex_unlock(&adev->srbm_mutex);
 	} else {
-		memset((void *)mqd, 0, sizeof(*mqd));
+		memset_io_pcie((void *)mqd, 0, sizeof(*mqd));
 		mutex_lock(&adev->srbm_mutex);
 		nv_grbm_select(adev, ring->me, ring->pipe, ring->queue, 0);
 		gfx_v10_0_compute_mqd_init(ring);
@@ -7044,7 +7044,7 @@ static int gfx_v10_0_kcq_init_queue(struct amdgpu_ring *ring)
 	int mqd_idx = ring - &adev->gfx.compute_ring[0];
 
 	if (!amdgpu_in_reset(adev) && !adev->in_suspend) {
-		memset((void *)mqd, 0, sizeof(*mqd));
+		memset_io_pcie((void *)mqd, 0, sizeof(*mqd));
 		mutex_lock(&adev->srbm_mutex);
 		nv_grbm_select(adev, ring->me, ring->pipe, ring->queue, 0);
 		gfx_v10_0_compute_mqd_init(ring);
