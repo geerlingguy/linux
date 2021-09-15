@@ -125,7 +125,7 @@ static void sdma_v5_2_destroy_inst_ctx(struct amdgpu_device *adev)
 {
 	release_firmware(adev->sdma.instance[0].fw);
 
-	memset((void *)adev->sdma.instance, 0,
+	memset_io_pcie((void *)adev->sdma.instance, 0,
 	       sizeof(struct amdgpu_sdma_instance) * AMDGPU_MAX_SDMA_INSTANCES);
 }
 
@@ -987,7 +987,7 @@ static int sdma_v5_2_ring_test_ib(struct amdgpu_ring *ring, long timeout)
 	gpu_addr = adev->wb.gpu_addr + (index * 4);
 	tmp = 0xCAFEDEAD;
 	adev->wb.wb[index] = cpu_to_le32(tmp);
-	memset(&ib, 0, sizeof(ib));
+	memset_io_pcie(&ib, 0, sizeof(ib));
 	r = amdgpu_ib_get(adev, NULL, 256, AMDGPU_IB_POOL_DIRECT, &ib);
 	if (r) {
 		DRM_ERROR("amdgpu: failed to get ib (%ld).\n", r);

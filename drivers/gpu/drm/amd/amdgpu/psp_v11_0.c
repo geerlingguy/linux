@@ -617,7 +617,9 @@ static int psp_v11_0_memory_training(struct psp_context *psp, uint32_t ops)
 	void *buf;
 	int ret, idx;
 
-	if (ctx->init == PSP_MEM_TRAIN_NOT_SUPPORT) {
+	// Disable memory training because it causes hard lockup on Pi.
+	// if (ctx->init == PSP_MEM_TRAIN_NOT_SUPPORT) {
+	if (true) {
 		DRM_DEBUG("Memory training is not supported.\n");
 		return 0;
 	} else if (ctx->init != PSP_MEM_TRAIN_INIT_SUCCESS) {

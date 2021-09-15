@@ -142,7 +142,7 @@ static int gmc_v10_0_process_interrupt(struct amdgpu_device *adev,
 	if (!printk_ratelimit())
 		return 0;
 
-	memset(&task_info, 0, sizeof(struct amdgpu_task_info));
+	memset_io_pcie(&task_info, 0, sizeof(struct amdgpu_task_info));
 	amdgpu_vm_get_task_info(adev, entry->pasid, &task_info);
 
 	dev_err(adev->dev,

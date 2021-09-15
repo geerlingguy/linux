@@ -1169,10 +1169,10 @@ static int amdgpu_device_wb_init(struct amdgpu_device *adev)
 		}
 
 		adev->wb.num_wb = AMDGPU_MAX_WB;
-		memset(&adev->wb.used, 0, sizeof(adev->wb.used));
+		memset_io_pcie(&adev->wb.used, 0, sizeof(adev->wb.used));
 
 		/* clear wb memory */
-		memset((char *)adev->wb.wb, 0, AMDGPU_MAX_WB * sizeof(uint32_t) * 8);
+		memset_io_pcie((char *)adev->wb.wb, 0, AMDGPU_MAX_WB * sizeof(uint32_t) * 8);
 	}
 
 	return 0;
@@ -2319,6 +2319,9 @@ static int amdgpu_device_fw_loading(struct amdgpu_device *adev)
 	int i;
 	uint32_t smu_version;
 
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__);
+	msleep(500);
+
 	if (adev->asic_type >= CHIP_VEGA10) {
 		for (i = 0; i < adev->num_ip_blocks; i++) {
 			if (adev->ip_blocks[i].version->type != AMD_IP_BLOCK_TYPE_PSP)
@@ -2339,7 +2342,17 @@ static int amdgpu_device_fw_loading(struct amdgpu_device *adev)
 					return r;
 				}
 			} else {
+
+				printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__);
+				printk(KERN_ALERT "DEBUG: On IP block <%s>\n", adev->ip_blocks[i].version->funcs->name);
+				printk(KERN_ALERT "DEBUG: On IP block %d \n",i);
+				msleep(500);
+
 				r = adev->ip_blocks[i].version->funcs->hw_init(adev);
+
+				printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__);
+				msleep(500);
+
 				if (r) {
 					DRM_ERROR("hw_init of IP block <%s> failed %d\n",
 							  adev->ip_blocks[i].version->funcs->name, r);
@@ -2378,6 +2391,9 @@ static int amdgpu_device_ip_init(struct amdgpu_device *adev)
 		return r;
 
 	for (i = 0; i < adev->num_ip_blocks; i++) {
+		printk(KERN_ALERT "DEBUG: On IP block <%s>\n", adev->ip_blocks[i].version->funcs->name);
+		msleep(500);
+
 		if (!adev->ip_blocks[i].status.valid)
 			continue;
 		r = adev->ip_blocks[i].version->funcs->sw_init((void *)adev);
@@ -2434,13 +2450,22 @@ static int amdgpu_device_ip_init(struct amdgpu_device *adev)
 	if (r)
 		goto init_failed;
 
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__);
+	msleep(500);
+
 	r = amdgpu_device_ip_hw_init_phase1(adev);
 	if (r)
 		goto init_failed;
 
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__);
+	msleep(500);
+
 	r = amdgpu_device_fw_loading(adev);
 	if (r)
 		goto init_failed;
+
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__);
+	msleep(500);
 
 	r = amdgpu_device_ip_hw_init_phase2(adev);
 	if (r)
@@ -4944,7 +4969,7 @@ int amdgpu_device_gpu_recover(struct amdgpu_device *adev,
 	int tmp_vram_lost_counter;
 	struct amdgpu_reset_context reset_context;
 
-	memset(&reset_context, 0, sizeof(reset_context));
+	memset_io_pcie(&reset_context, 0, sizeof(reset_context));
 
 	/*
 	 * Special case: RAS triggered and full reset isn't supported
@@ -5483,7 +5508,7 @@ pci_ers_result_t amdgpu_pci_slot_reset(struct pci_dev *pdev)
 
 	DRM_INFO("PCI error: slot reset callback!!\n");
 
-	memset(&reset_context, 0, sizeof(reset_context));
+	memset_io_pcie(&reset_context, 0, sizeof(reset_context));
 
 	INIT_LIST_HEAD(&device_list);
 	list_add_tail(&adev->reset_list, &device_list);

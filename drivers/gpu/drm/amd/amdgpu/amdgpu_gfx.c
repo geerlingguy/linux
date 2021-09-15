@@ -147,7 +147,7 @@ void amdgpu_gfx_parse_disable_cu(unsigned *mask, unsigned max_se, unsigned max_s
 	unsigned se, sh, cu;
 	const char *p;
 
-	memset(mask, 0, sizeof(*mask) * max_se * max_sh);
+	memset_io_pcie(mask, 0, sizeof(*mask) * max_se * max_sh);
 
 	if (!amdgpu_disable_cu || !*amdgpu_disable_cu)
 		return;
@@ -345,7 +345,7 @@ int amdgpu_gfx_kiq_init(struct amdgpu_device *adev,
 		return r;
 	}
 
-	memset(hpd, 0, hpd_size);
+	memset_io_pcie(hpd, 0, hpd_size);
 
 	r = amdgpu_bo_reserve(kiq->eop_obj, true);
 	if (unlikely(r != 0))
