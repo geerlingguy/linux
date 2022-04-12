@@ -217,4 +217,11 @@ int hw_sm750_pan_display(struct lynxfb_crtc *crtc,
 			 const struct fb_var_screeninfo *var,
 			 const struct fb_info *info);
 
+/*
+  * memcpy_io and memset_io functions that work on a raspberry pi 4
+  */
+void memcpy_fromio_pcie(void *to, const volatile void __iomem *from, size_t count);
+void memcpy_toio_pcie(volatile void __iomem *to, const void *from, size_t count);
+void memset_io_pcie(volatile void __iomem *dst, int c, size_t count);
+
 #endif
