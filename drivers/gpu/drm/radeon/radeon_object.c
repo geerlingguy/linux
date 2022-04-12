@@ -220,6 +220,10 @@ int radeon_bo_create(struct radeon_device *rdev,
 		bo->flags &= ~RADEON_GEM_GTT_WC;
 #endif
 
+	//Write combining may cause issues on the raspberry pi
+	bo->flags &= ~(RADEON_GEM_GTT_WC | RADEON_GEM_GTT_UC);
+	bo->flags |= RADEON_GEM_GTT_UC;
+
 	radeon_ttm_placement_from_domain(bo, domain);
 	/* Kernel allocation are uninterruptible */
 	down_read(&rdev->pm.mclk_lock);

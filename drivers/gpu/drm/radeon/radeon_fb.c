@@ -209,6 +209,36 @@ out_unref:
 	return ret;
 }
 
+//memset_io with only 32-bit accesses
+ void memset_io_pcie(volatile void __iomem *dst, int c, size_t count)
+ {
+  u64 qc = (u8)c;
+
+  qc |= qc << 8;
+  qc |= qc << 16;
+  //qc |= qc << 32;
+
+  __iowmb();
+
+  while (count && !IS_ALIGNED((unsigned long)dst, 16)) {
+    __raw_writeb(c, dst);
+    dst++;
+    count--;
+  }
+
+  while (count >= 4) {
+    __raw_writel(qc, dst);
+    dst += 4;
+    count -= 4;
+  }
+
+  while (count) {
+    __raw_writeb(c, dst);
+    dst++;
+    count--;
+  }
+}
+
 static int radeonfb_create(struct drm_fb_helper *helper,
 			   struct drm_fb_helper_surface_size *sizes)
 {
@@ -262,7 +292,7 @@ static int radeonfb_create(struct drm_fb_helper *helper,
 	/* setup helper */
 	rfbdev->helper.fb = fb;
 
-	memset_io(rbo->kptr, 0x0, radeon_bo_size(rbo));
+	memset_io_pcie(rbo->kptr, 0x0, radeon_bo_size(rbo));
 
 	info->fbops = &radeonfb_ops;
 
