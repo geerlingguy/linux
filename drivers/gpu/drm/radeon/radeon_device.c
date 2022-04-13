@@ -582,7 +582,7 @@ int radeon_wb_init(struct radeon_device *rdev)
 
 	if (rdev->wb.wb_obj == NULL) {
 		r = radeon_bo_create(rdev, RADEON_GPU_PAGE_SIZE, PAGE_SIZE, true,
-				     RADEON_GEM_DOMAIN_GTT, 0, NULL, NULL,
+				     RADEON_GEM_DOMAIN_VRAM, 0, NULL, NULL,
 				     &rdev->wb.wb_obj);
 		if (r) {
 			dev_warn(rdev->dev, "(%d) create WB bo failed\n", r);
@@ -593,7 +593,7 @@ int radeon_wb_init(struct radeon_device *rdev)
 			radeon_wb_fini(rdev);
 			return r;
 		}
-		r = radeon_bo_pin(rdev->wb.wb_obj, RADEON_GEM_DOMAIN_GTT,
+		r = radeon_bo_pin(rdev->wb.wb_obj, RADEON_GEM_DOMAIN_VRAM,
 				&rdev->wb.gpu_addr);
 		if (r) {
 			radeon_bo_unreserve(rdev->wb.wb_obj);
@@ -1622,6 +1622,9 @@ int radeon_device_init(struct radeon_device *rdev,
 		else
 			DRM_INFO("radeon: acceleration disabled, skipping benchmarks\n");
 	}
+
+	mutex_init(&rdev->move_bos_mutex);
+
 	return 0;
 
 failed:

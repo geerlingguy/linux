@@ -516,6 +516,7 @@ static struct ttm_tt *radeon_ttm_tt_create(struct ttm_buffer_object *bo,
 		return NULL;
 	}
 
+	// TODO: Highly suspect.
 	if (rbo->flags & RADEON_GEM_GTT_UC)
 		caching = ttm_uncached;
 	else if (rbo->flags & RADEON_GEM_GTT_WC)
