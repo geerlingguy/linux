@@ -112,6 +112,98 @@ static const char radeon_family_name[][16] = {
 	"LAST",
 };
 
+/**
+ * DOC: memcpy_fromio_pcie
+ *
+ * like memcpy_fromio, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
+ */
+
+void memcpy_fromio_pcie(void *to, const volatile void __iomem *from, size_t count)
+{
+	while (count && !IS_ALIGNED((unsigned long)from, 8)) {
+		*(u8 *)to = __raw_readb(from);
+		from++;
+		to++;
+		count--;
+	}
+
+	while (count >= 4) {
+		*(u32 *)to = __raw_readl(from);
+		from += 4;
+		to += 4;
+		count -= 4;
+	}
+
+	while (count) {
+		*(u8 *)to = __raw_readb(from);
+		from++;
+		to++;
+		count--;
+	}
+}
+
+/**
+ * DOC: memcpy_toio_pcie
+ *
+ * like memcpy_toio, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
+ */
+
+void memcpy_toio_pcie(volatile void __iomem *to, const void *from, size_t count)
+{
+	while (count && !IS_ALIGNED((unsigned long)to, 8)) {
+		__raw_writeb(*(u8 *)from, to);
+		from++;
+		to++;
+		count--;
+	}
+
+	while (count >= 4) {
+		__raw_writel(*(u64 *)from, to);
+		from += 4;
+		to += 4;
+		count -= 4;
+	}
+
+	while (count) {
+		__raw_writeb(*(u8 *)from, to);
+		from++;
+		to++;
+		count--;
+	}
+}
+
+/**
+ * DOC: memset_io_pcie
+ *
+ * like memset_io, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
+ */
+
+void memset_io_pcie(volatile void __iomem *dst, int c, size_t count)
+{
+	u32 qc = (u8)c;
+
+	qc |= qc << 8;
+	qc |= qc << 16;
+
+	while (count && !IS_ALIGNED((unsigned long)dst, 8)) {
+		__raw_writeb(c, dst);
+		dst++;
+		count--;
+	}
+
+	while (count >= 4) {
+		__raw_writel(qc, dst);
+		dst += 4;
+		count -= 4;
+	}
+
+	while (count) {
+		__raw_writeb(c, dst);
+		dst++;
+		count--;
+	}
+}
+
 #if defined(CONFIG_VGA_SWITCHEROO)
 bool radeon_has_atpx_dgpu_power_cntl(void);
 bool radeon_is_atpx_hybrid(void);
