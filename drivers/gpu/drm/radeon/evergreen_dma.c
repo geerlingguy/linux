@@ -155,6 +155,8 @@ struct radeon_fence *evergreen_copy_dma(struct radeon_device *rdev,
 	radeon_ring_unlock_commit(rdev, ring, false);
 	radeon_sync_free(rdev, &sync, fence);
 
+	r600_dma_ring_test(rdev, ring);
+
 	return fence;
 }
 

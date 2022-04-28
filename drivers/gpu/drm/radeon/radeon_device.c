@@ -112,6 +112,98 @@ static const char radeon_family_name[][16] = {
 	"LAST",
 };
 
+/**
+ * DOC: memcpy_fromio_pcie
+ *
+ * like memcpy_fromio, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
+ */
+
+void memcpy_fromio_pcie(void *to, const volatile void __iomem *from, size_t count)
+{
+	while (count && !IS_ALIGNED((unsigned long)from, 8)) {
+		*(u8 *)to = __raw_readb(from);
+		from++;
+		to++;
+		count--;
+	}
+
+	while (count >= 4) {
+		*(u32 *)to = __raw_readl(from);
+		from += 4;
+		to += 4;
+		count -= 4;
+	}
+
+	while (count) {
+		*(u8 *)to = __raw_readb(from);
+		from++;
+		to++;
+		count--;
+	}
+}
+
+/**
+ * DOC: memcpy_toio_pcie
+ *
+ * like memcpy_toio, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
+ */
+
+void memcpy_toio_pcie(volatile void __iomem *to, const void *from, size_t count)
+{
+	while (count && !IS_ALIGNED((unsigned long)to, 8)) {
+		__raw_writeb(*(u8 *)from, to);
+		from++;
+		to++;
+		count--;
+	}
+
+	while (count >= 4) {
+		__raw_writel(*(u64 *)from, to);
+		from += 4;
+		to += 4;
+		count -= 4;
+	}
+
+	while (count) {
+		__raw_writeb(*(u8 *)from, to);
+		from++;
+		to++;
+		count--;
+	}
+}
+
+/**
+ * DOC: memset_io_pcie
+ *
+ * like memset_io, but it only uses 8-bit and 32-bit wide accesses to work on a raspberry pi 4
+ */
+
+void memset_io_pcie(volatile void __iomem *dst, int c, size_t count)
+{
+	u32 qc = (u8)c;
+
+	qc |= qc << 8;
+	qc |= qc << 16;
+
+	while (count && !IS_ALIGNED((unsigned long)dst, 8)) {
+		__raw_writeb(c, dst);
+		dst++;
+		count--;
+	}
+
+	while (count >= 4) {
+		__raw_writel(qc, dst);
+		dst += 4;
+		count -= 4;
+	}
+
+	while (count) {
+		__raw_writeb(c, dst);
+		dst++;
+		count--;
+	}
+}
+
 #if defined(CONFIG_VGA_SWITCHEROO)
 bool radeon_has_atpx_dgpu_power_cntl(void);
 bool radeon_is_atpx_hybrid(void);
@@ -446,6 +538,42 @@ void radeon_wb_fini(struct radeon_device *rdev)
 	}
 }
 
+//memset_io with only 32-bit accesses
+void memset_io_pcie_wb(volatile void __iomem *dst, int c, size_t count)
+{
+	u32 qc = (u8)c;
+
+	qc |= qc << 8;
+	qc |= qc << 16;
+	//qc |= qc << 32;
+	mb();
+
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
+
+	while (count && !IS_ALIGNED((unsigned long)dst, 8)) {
+		__raw_writeb(c, dst);
+		dst++;
+		count--;
+	}
+
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
+
+	while (count >= 4) {
+		__raw_writel(qc, dst);
+		dst += 4;
+		count -= 4;
+	}
+
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
+
+	while (count) {
+		__raw_writeb(c, dst);
+		dst++;
+		count--;
+	}
+}
+
+
 /**
  * radeon_wb_init- Init Writeback driver info and allocate memory
  *
@@ -461,7 +589,7 @@ int radeon_wb_init(struct radeon_device *rdev)
 
 	if (rdev->wb.wb_obj == NULL) {
 		r = radeon_bo_create(rdev, RADEON_GPU_PAGE_SIZE, PAGE_SIZE, true,
-				     RADEON_GEM_DOMAIN_GTT, 0, NULL, NULL,
+				     RADEON_GEM_DOMAIN_VRAM, 0, NULL, NULL,
 				     &rdev->wb.wb_obj);
 		if (r) {
 			dev_warn(rdev->dev, "(%d) create WB bo failed\n", r);
@@ -472,7 +600,7 @@ int radeon_wb_init(struct radeon_device *rdev)
 			radeon_wb_fini(rdev);
 			return r;
 		}
-		r = radeon_bo_pin(rdev->wb.wb_obj, RADEON_GEM_DOMAIN_GTT,
+		r = radeon_bo_pin(rdev->wb.wb_obj, RADEON_GEM_DOMAIN_VRAM,
 				&rdev->wb.gpu_addr);
 		if (r) {
 			radeon_bo_unreserve(rdev->wb.wb_obj);
@@ -489,14 +617,23 @@ int radeon_wb_init(struct radeon_device *rdev)
 		}
 	}
 
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
+
 	/* clear wb memory */
-	memset((char *)rdev->wb.wb, 0, RADEON_GPU_PAGE_SIZE);
+	memset_io_pcie_wb((char *)rdev->wb.wb, 0, RADEON_GPU_PAGE_SIZE);
+
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
+
 	/* disable event_write fences */
 	rdev->wb.use_event = false;
+
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
+
 	/* disabled via module param */
 	if (radeon_no_wb == 1) {
 		rdev->wb.enabled = false;
 	} else {
+		printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 		if (rdev->flags & RADEON_IS_AGP) {
 			/* often unreliable on AGP */
 			rdev->wb.enabled = false;
@@ -504,6 +641,7 @@ int radeon_wb_init(struct radeon_device *rdev)
 			/* often unreliable on pre-r300 */
 			rdev->wb.enabled = false;
 		} else {
+			printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 			rdev->wb.enabled = true;
 			/* event_write fences are only available on r600+ */
 			if (rdev->family >= CHIP_R600) {
@@ -511,12 +649,14 @@ int radeon_wb_init(struct radeon_device *rdev)
 			}
 		}
 	}
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 	/* always use writeback/events on NI, APUs */
 	if (rdev->family >= CHIP_PALM) {
 		rdev->wb.enabled = true;
 		rdev->wb.use_event = true;
 	}
 
+	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 	dev_info(rdev->dev, "WB %sabled\n", rdev->wb.enabled ? "en" : "dis");
 
 	return 0;
@@ -1501,6 +1641,9 @@ int radeon_device_init(struct radeon_device *rdev,
 		else
 			DRM_INFO("radeon: acceleration disabled, skipping benchmarks\n");
 	}
+
+	mutex_init(&rdev->move_bos_mutex);
+
 	return 0;
 
 failed:

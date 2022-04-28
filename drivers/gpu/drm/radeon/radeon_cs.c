@@ -663,6 +663,7 @@ int radeon_cs_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 	struct radeon_device *rdev = dev->dev_private;
 	struct radeon_cs_parser parser;
 	int r;
+	INIT_LIST_HEAD(&rdev->move_bo_head);
 
 	down_read(&rdev->exclusive_lock);
 	if (!rdev->accel_working) {
@@ -676,6 +677,7 @@ int radeon_cs_ioctl(struct drm_device *dev, void *data, struct drm_file *filp)
 			r = -EAGAIN;
 		return r;
 	}
+	rdev->trackMoves = true;
 	/* initialize parser */
 	memset(&parser, 0, sizeof(struct radeon_cs_parser));
 	parser.filp = filp;

@@ -72,7 +72,7 @@ static bool igp_read_bios_from_vram(struct radeon_device *rdev)
 		iounmap(bios);
 		return false;
 	}
-	memcpy_fromio(rdev->bios, bios, size);
+	memcpy_fromio_pcie(rdev->bios, bios, size);
 	iounmap(bios);
 	return true;
 }
@@ -81,6 +81,7 @@ static bool radeon_read_bios(struct radeon_device *rdev)
 {
 	uint8_t __iomem *bios, val1, val2;
 	size_t size;
+	int pos;
 
 	rdev->bios = NULL;
 	/* XXX: some cards may return 0 for rom size? ddx has a workaround */
@@ -101,7 +102,11 @@ static bool radeon_read_bios(struct radeon_device *rdev)
 		pci_unmap_rom(rdev->pdev, bios);
 		return false;
 	}
-	memcpy_fromio(rdev->bios, bios, size);
+	//memcpy_fromio(rdev->bios, bios, size);
+	for(pos = 0;pos < size; pos++){
+	  //memcpy_fromio(rdev->bios+pos,bios+pos,1);
+	  rdev->bios[pos] = __raw_readb(bios+pos);
+	}
 	pci_unmap_rom(rdev->pdev, bios);
 	return true;
 }
@@ -125,7 +130,7 @@ static bool radeon_read_platform_bios(struct radeon_device *rdev)
 	if (!bios)
 		goto free_bios;
 
-	memcpy_fromio(rdev->bios, bios, romlen);
+	memcpy_fromio_pcie(rdev->bios, bios, romlen);
 	iounmap(bios);
 
 	if (rdev->bios[0] != 0x55 || rdev->bios[1] != 0xaa)

@@ -109,29 +109,29 @@ void radeon_ttm_placement_from_domain(struct radeon_bo *rbo, u32 domain)
 			rbo->placements[c].fpfn =
 				rbo->rdev->mc.visible_vram_size >> PAGE_SHIFT;
 			rbo->placements[c].mem_type = TTM_PL_VRAM;
-			rbo->placements[c++].flags = 0;
+			rbo->placements[c++].flags = RADEON_GEM_GTT_UC;
 		}
 
 		rbo->placements[c].fpfn = 0;
 		rbo->placements[c].mem_type = TTM_PL_VRAM;
-		rbo->placements[c++].flags = 0;
+		rbo->placements[c++].flags = RADEON_GEM_GTT_UC;
 	}
 
 	if (domain & RADEON_GEM_DOMAIN_GTT) {
 		rbo->placements[c].fpfn = 0;
 		rbo->placements[c].mem_type = TTM_PL_TT;
-		rbo->placements[c++].flags = 0;
+		rbo->placements[c++].flags = RADEON_GEM_GTT_UC;
 	}
 
 	if (domain & RADEON_GEM_DOMAIN_CPU) {
 		rbo->placements[c].fpfn = 0;
 		rbo->placements[c].mem_type = TTM_PL_SYSTEM;
-		rbo->placements[c++].flags = 0;
+		rbo->placements[c++].flags = RADEON_GEM_GTT_UC;
 	}
 	if (!c) {
 		rbo->placements[c].fpfn = 0;
 		rbo->placements[c].mem_type = TTM_PL_SYSTEM;
-		rbo->placements[c++].flags = 0;
+		rbo->placements[c++].flags = RADEON_GEM_GTT_UC;
 	}
 
 	rbo->placement.num_placement = c;
@@ -184,6 +184,7 @@ int radeon_bo_create(struct radeon_device *rdev,
 
 	bo->flags = flags;
 	/* PCI GART is always snooped */
+	/* Don't be so sure. TODO */
 	if (!(rdev->flags & RADEON_IS_PCIE))
 		bo->flags &= ~(RADEON_GEM_GTT_WC | RADEON_GEM_GTT_UC);
 
@@ -219,6 +220,10 @@ int radeon_bo_create(struct radeon_device *rdev,
 	if (!drm_arch_can_wc_memory())
 		bo->flags &= ~RADEON_GEM_GTT_WC;
 #endif
+
+	//Write combining may cause issues on the raspberry pi
+	bo->flags &= ~(RADEON_GEM_GTT_WC | RADEON_GEM_GTT_UC);
+	bo->flags |= RADEON_GEM_GTT_UC;
 
 	radeon_ttm_placement_from_domain(bo, domain);
 	/* Kernel allocation are uninterruptible */

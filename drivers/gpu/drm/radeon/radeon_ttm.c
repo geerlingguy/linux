@@ -456,7 +456,8 @@ static int radeon_ttm_backend_bind(struct ttm_device *bdev,
 		     ttm->num_pages, bo_mem, ttm);
 	}
 	if (ttm->caching == ttm_cached)
-		flags |= RADEON_GART_PAGE_SNOOP;
+		printk("TTM Page would've been snooped\n");
+		// flags |= RADEON_GART_PAGE_SNOOP;
 	r = radeon_gart_bind(rdev, gtt->offset, ttm->num_pages,
 			     ttm->pages, gtt->ttm.dma_address, flags);
 	if (r) {
@@ -515,6 +516,7 @@ static struct ttm_tt *radeon_ttm_tt_create(struct ttm_buffer_object *bo,
 		return NULL;
 	}
 
+	// TODO: Highly suspect.
 	if (rbo->flags & RADEON_GEM_GTT_UC)
 		caching = ttm_uncached;
 	else if (rbo->flags & RADEON_GEM_GTT_WC)

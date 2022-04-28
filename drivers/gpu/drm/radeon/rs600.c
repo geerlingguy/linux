@@ -651,8 +651,8 @@ uint64_t rs600_gart_get_page_entry(uint64_t addr, uint32_t flags)
 		addr |= R600_PTE_READABLE;
 	if (flags & RADEON_GART_PAGE_WRITE)
 		addr |= R600_PTE_WRITEABLE;
-	if (flags & RADEON_GART_PAGE_SNOOP)
-		addr |= R600_PTE_SNOOPED;
+	// if (flags & RADEON_GART_PAGE_SNOOP) // no snooping around
+	// 	addr |= R600_PTE_SNOOPED;
 	return addr;
 }
 
@@ -660,7 +660,10 @@ void rs600_gart_set_page(struct radeon_device *rdev, unsigned i,
 			 uint64_t entry)
 {
 	void __iomem *ptr = (void *)rdev->gart.ptr;
-	writeq(entry, ptr + (i * 8));
+	uint32_t high = entry >> 32;
+	writel(entry,ptr+(i*8));
+	writel(high,ptr + (i*8) + 4);
+	//writeq(entry, ptr + (i * 8));
 }
 
 int rs600_irq_set(struct radeon_device *rdev)

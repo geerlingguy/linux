@@ -321,6 +321,23 @@ int radeon_gart_bind(struct radeon_device *rdev, unsigned offset,
 }
 
 /**
+ * syncs all bound pages for the card (workaround for incoherent systems)
+ *
+ */
+void radeon_gart_sync_all_for_device(struct radeon_device *rdev){
+	int i;
+	printk("syncing all GART pages for device\n");
+	for (i = 0; i < rdev->gart.num_gpu_pages; i++){    // loop over all gpu pages
+        	if(rdev->gart.pages_entry[i] == rdev->dummy_page.entry){
+        		continue;    // entry is just the dummy page, so it can be ignored
+        	}
+        	dma_sync_single_for_device(rdev->dev, rdev->gart.pages_entry[i] & 0xFFFFFFFFFFFFF000ULL, 4096, DMA_BIDIRECTIONAL);
+        	dma_sync_single_for_cpu(rdev->dev, rdev->gart.pages_entry[i] & 0xFFFFFFFFFFFFF000ULL, 4096, DMA_BIDIRECTIONAL);
+	}
+
+}
+
+/**
  * radeon_gart_init - init the driver info for managing the gart
  *
  * @rdev: radeon_device pointer
