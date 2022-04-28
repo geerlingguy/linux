@@ -79,7 +79,7 @@ int hw_sm750_map(struct sm750_dev *sm750_dev, struct pci_dev *pdev)
 
 	/* reserve the vidmem space of smi adaptor */
 	sm750_dev->pvMem =
-		ioremap_wc(sm750_dev->vidmem_start, sm750_dev->vidmem_size);
+		ioremap(sm750_dev->vidmem_start, sm750_dev->vidmem_size);
 	if (!sm750_dev->pvMem) {
 		pr_err("Map video memory failed\n");
 		ret = -EFAULT;
