@@ -3702,7 +3702,7 @@ int r600_irq_init(struct radeon_device *rdev)
 	 */
 	interrupt_cntl &= ~IH_DUMMY_RD_OVERRIDE;
 	/* IH_REQ_NONSNOOP_EN=1 if ring is in non-cacheable memory, e.g., vram */
-	interrupt_cntl &= ~IH_REQ_NONSNOOP_EN;
+	interrupt_cntl |= IH_REQ_NONSNOOP_EN;
 	WREG32(INTERRUPT_CNTL, interrupt_cntl);
 
 	WREG32(IH_RB_BASE, rdev->ih.gpu_addr >> 8);

@@ -295,7 +295,7 @@ static int radeon_ttm_io_mem_reserve(struct ttm_device *bdev, struct ttm_resourc
 			return -EINVAL;
 		mem->bus.offset += rdev->mc.aper_base;
 		mem->bus.is_iomem = true;
-		mem->bus.caching = ttm_write_combined;
+		mem->bus.caching = ttm_uncached;
 #ifdef __alpha__
 		/*
 		 * Alpha: use bus.addr to hold the ioremap() return,
@@ -523,7 +523,7 @@ static struct ttm_tt *radeon_ttm_tt_create(struct ttm_buffer_object *bo,
 		caching = ttm_write_combined;
 	else
 		caching = ttm_cached;
-
+	caching = ttm_uncached;
 	if (ttm_sg_tt_init(&gtt->ttm, bo, page_flags, caching)) {
 		kfree(gtt);
 		return NULL;
