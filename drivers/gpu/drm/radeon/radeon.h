@@ -2347,10 +2347,6 @@ struct radeon_atcs {
 typedef uint32_t (*radeon_rreg_t)(struct radeon_device*, uint32_t);
 typedef void (*radeon_wreg_t)(struct radeon_device*, uint32_t, uint32_t);
 
-struct moved_bos_entry{
-	struct radeon_bo* bo;
-	struct list_head list;
-};
 
 struct radeon_device {
 	struct device			*dev;
@@ -2497,25 +2493,9 @@ struct radeon_device {
 	/* tracking pinned memory */
 	u64 vram_pin_size;
 	u64 gart_pin_size;
-	struct radeon_bo *rick;
-	uint64_t rick_gpu;
-	void *rick_cpu;
-	uint64_t fb_gpu;
-
-	// reading back shader code for debugging
-	struct radeon_bo* shader_read_bo;
-	uint64_t shader_read_gpu;
-	void* shader_read_cpu;
 
 	// needed because of weird stuff
 	int numFSuses;
-
-	// tracking moved BOs to move them back after CS execution
-	struct radeon_bo** moved_bos;	// array of pointers to the BOs that were moved
-	int nMovedBos;	// number of BOs moved (determines size of array)
-	struct mutex move_bos_mutex;
-	struct list_head move_bo_head;
-	bool trackMoves;	// enables or disables tracking of the BO moves to avoid tracking while moving the BOs back after CS execution
 };
 
 bool radeon_is_px(struct drm_device *dev);

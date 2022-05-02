@@ -617,23 +617,14 @@ int radeon_wb_init(struct radeon_device *rdev)
 		}
 	}
 
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
-
 	/* clear wb memory */
 	memset_io_pcie_wb((char *)rdev->wb.wb, 0, RADEON_GPU_PAGE_SIZE);
-
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
-
 	/* disable event_write fences */
 	rdev->wb.use_event = false;
-
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
-
 	/* disabled via module param */
 	if (radeon_no_wb == 1) {
 		rdev->wb.enabled = false;
 	} else {
-		printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 		if (rdev->flags & RADEON_IS_AGP) {
 			/* often unreliable on AGP */
 			rdev->wb.enabled = false;
@@ -641,7 +632,6 @@ int radeon_wb_init(struct radeon_device *rdev)
 			/* often unreliable on pre-r300 */
 			rdev->wb.enabled = false;
 		} else {
-			printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 			rdev->wb.enabled = true;
 			/* event_write fences are only available on r600+ */
 			if (rdev->family >= CHIP_R600) {
@@ -649,14 +639,12 @@ int radeon_wb_init(struct radeon_device *rdev)
 			}
 		}
 	}
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 	/* always use writeback/events on NI, APUs */
 	if (rdev->family >= CHIP_PALM) {
 		rdev->wb.enabled = true;
 		rdev->wb.use_event = true;
 	}
 
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 	dev_info(rdev->dev, "WB %sabled\n", rdev->wb.enabled ? "en" : "dis");
 
 	return 0;
@@ -1641,9 +1629,6 @@ int radeon_device_init(struct radeon_device *rdev,
 		else
 			DRM_INFO("radeon: acceleration disabled, skipping benchmarks\n");
 	}
-
-	mutex_init(&rdev->move_bos_mutex);
-
 	return 0;
 
 failed:

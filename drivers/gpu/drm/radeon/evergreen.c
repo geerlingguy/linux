@@ -5029,7 +5029,6 @@ static int evergreen_startup(struct radeon_device *rdev)
 		if (r)
 			return r;
 	}
-
 	evergreen_gpu_init(rdev);
 
 	/* allocate rlc buffers */
@@ -5045,16 +5044,10 @@ static int evergreen_startup(struct radeon_device *rdev)
 		}
 	}
 
-	/* TODO: Dying after here currently. */
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
-
 	/* allocate wb buffer */
 	r = radeon_wb_init(rdev);
 	if (r)
 		return r;
-
-	/* TODO: Dying before here currently. */
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
 
 	r = radeon_fence_driver_start_ring(rdev, RADEON_RING_TYPE_GFX_INDEX);
 	if (r) {
