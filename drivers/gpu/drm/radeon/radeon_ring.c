@@ -31,7 +31,6 @@
 #include <drm/drm_file.h>
 
 #include "radeon.h"
-#include "evergreend.h"
 
 /*
  * Rings
@@ -178,13 +177,6 @@ void radeon_ring_commit(struct radeon_device *rdev, struct radeon_ring *ring,
 		radeon_ring_write(ring, ring->nop);
 	}
 	mb();
-
-	__iowmb();
-	dsb(sy);
-	int numdw;
-	int i;
-	numdw = ring->wptr - ring->wptr_old;
-
 	/* If we are emitting the HDP flush via MMIO, we need to do it after
 	 * all CPU writes to VRAM finished.
 	 */

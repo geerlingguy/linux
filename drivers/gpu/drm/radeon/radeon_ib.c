@@ -30,7 +30,6 @@
 #include <drm/drm_file.h>
 
 #include "radeon.h"
-#include "evergreend.h"
 
 /*
  * IB
@@ -128,22 +127,6 @@ int radeon_ib_schedule(struct radeon_device *rdev, struct radeon_ib *ib,
 {
 	struct radeon_ring *ring = &rdev->ring[ib->ring];
 	int r = 0;
-
-	printk("IB scheduled, dumping %d DWORDs\n",ib->length_dw);
-
-	if (0) {
-		radeon_ring_lock(rdev,ring,7);
-		radeon_ring_write(ring,PACKET3(PACKET3_CP_DMA,4));
-		radeon_ring_write(ring,lower_32_bits(rdev->rick_gpu));
-		radeon_ring_write(ring,upper_32_bits(rdev->rick_gpu) & 0xFF);
-		radeon_ring_write(ring,lower_32_bits(rdev->fb_gpu));
-		radeon_ring_write(ring,upper_32_bits(rdev->fb_gpu) & 0xFF);
-		radeon_ring_write(ring,(1920*1080*4) & 0xFFFFF);
-
-		radeon_ring_unlock_commit(rdev,ring,false);
-		printk("DMAd test image to FB\n");
-	}
-	radeon_gart_sync_all_for_device(rdev);
 
 	if (!ib->length_dw || !ring->ready) {
 		/* TODO: Nothings in the ib we should report. */

@@ -81,7 +81,6 @@ static bool radeon_read_bios(struct radeon_device *rdev)
 {
 	uint8_t __iomem *bios, val1, val2;
 	size_t size;
-	int pos;
 
 	rdev->bios = NULL;
 	/* XXX: some cards may return 0 for rom size? ddx has a workaround */
@@ -102,11 +101,7 @@ static bool radeon_read_bios(struct radeon_device *rdev)
 		pci_unmap_rom(rdev->pdev, bios);
 		return false;
 	}
-	//memcpy_fromio(rdev->bios, bios, size);
-	for(pos = 0;pos < size; pos++){
-	  //memcpy_fromio(rdev->bios+pos,bios+pos,1);
-	  rdev->bios[pos] = __raw_readb(bios+pos);
-	}
+	memcpy_fromio_pcie(rdev->bios, bios, size);
 	pci_unmap_rom(rdev->pdev, bios);
 	return true;
 }

@@ -330,39 +330,20 @@ int radeon_gem_create_ioctl(struct drm_device *dev, void *data,
 	struct radeon_device *rdev = dev->dev_private;
 	struct drm_radeon_gem_create *args = data;
 	struct drm_gem_object *gobj;
-	struct radeon_bo* rbo;
 	uint32_t handle;
 	int r;
-	u64 size;
-	__u32 flags;
 
 	down_read(&rdev->exclusive_lock);
 	/* create a gem object to contain this object in */
-	size = args->size;
-	flags = args->flags;
-	if(1){
-		flags &= ~RADEON_GEM_NO_CPU_ACCESS;
-		flags &= ~RADEON_GEM_GTT_WC;
-		flags |= RADEON_GEM_GTT_UC;
-
-		args->initial_domain = RADEON_GEM_DOMAIN_GTT;
-	}
 	args->size = roundup(args->size, PAGE_SIZE);
 	r = radeon_gem_object_create(rdev, args->size, args->alignment,
-				     args->initial_domain, flags,
+				     args->initial_domain, args->flags,
 				     false, &gobj);
 	if (r) {
 		up_read(&rdev->exclusive_lock);
 		r = radeon_gem_handle_lockup(rdev, r);
 		return r;
 	}
-
-	rbo = gem_to_radeon_bo(gobj);
-	if(size == 48){
-		// 12 dw, first shader
-		printk("first shader?\n");
-	}
-
 	r = drm_gem_handle_create(filp, gobj, &handle);
 	/* drop reference from allocate - handle holds it now */
 	drm_gem_object_put(gobj);
@@ -415,7 +396,7 @@ int radeon_gem_userptr_ioctl(struct drm_device *dev, void *data,
 
 	/* create a gem object to contain this object in */
 	r = radeon_gem_object_create(rdev, args->size, 0,
-				     RADEON_GEM_DOMAIN_GTT, 0,
+				     RADEON_GEM_DOMAIN_CPU, 0,
 				     false, &gobj);
 	if (r)
 		goto handle_lockup;
@@ -439,7 +420,7 @@ int radeon_gem_userptr_ioctl(struct drm_device *dev, void *data,
 			goto release_object;
 		}
 
-		radeon_ttm_placement_from_domain(bo, RADEON_GEM_DOMAIN_VRAM);
+		radeon_ttm_placement_from_domain(bo, RADEON_GEM_DOMAIN_GTT);
 		r = ttm_bo_validate(&bo->tbo, &bo->placement, &ctx);
 		radeon_bo_unreserve(bo);
 		mmap_read_unlock(current->mm);
@@ -823,9 +804,9 @@ int radeon_gem_op_ioctl(struct drm_device *dev, void *data,
 		args->value = robj->initial_domain;
 		break;
 	case RADEON_GEM_OP_SET_INITIAL_DOMAIN:
-		robj->initial_domain = args->value & (RADEON_GEM_DOMAIN_VRAM);// |
-						      //RADEON_GEM_DOMAIN_GTT |
-						      //RADEON_GEM_DOMAIN_CPU);
+		robj->initial_domain = args->value & (RADEON_GEM_DOMAIN_VRAM |
+						      RADEON_GEM_DOMAIN_GTT |
+						      RADEON_GEM_DOMAIN_CPU);
 		break;
 	default:
 		r = -EINVAL;

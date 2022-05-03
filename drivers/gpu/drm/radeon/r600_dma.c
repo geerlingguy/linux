@@ -57,7 +57,6 @@ uint32_t r600_dma_get_rptr(struct radeon_device *rdev,
 	else
 		rptr = RREG32(DMA_RB_RPTR);
 
-	mb(); //CHANGED
 	return (rptr & 0x3fffc) >> 2;
 }
 
@@ -246,7 +245,6 @@ int r600_dma_ring_test(struct radeon_device *rdev,
 	tmp = 0xCAFEDEAD;
 	rdev->wb.wb[index/4] = cpu_to_le32(tmp);
 
-	mb(); //CHANGED
 	r = radeon_ring_lock(rdev, ring, 4);
 	if (r) {
 		DRM_ERROR("radeon: dma failed to lock ring %d (%d).\n", ring->idx, r);
@@ -260,7 +258,6 @@ int r600_dma_ring_test(struct radeon_device *rdev,
 
 	for (i = 0; i < rdev->usec_timeout; i++) {
 		tmp = le32_to_cpu(rdev->wb.wb[index/4]);
-		mb(); //CHANGED
 		if (tmp == 0xDEADBEEF)
 			break;
 		udelay(1);
@@ -382,7 +379,6 @@ int r600_dma_ib_test(struct radeon_device *rdev, struct radeon_ring *ring)
 	r = 0;
 	for (i = 0; i < rdev->usec_timeout; i++) {
 		tmp = le32_to_cpu(rdev->wb.wb[index/4]);
-		mb(); //CHANGED
 		if (tmp == 0xDEADBEEF)
 			break;
 		udelay(1);
