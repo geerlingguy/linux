@@ -30,7 +30,6 @@
 #include <drm/drm_file.h>
 
 #include "radeon.h"
-#include "evergreend.h"
 
 /*
  * IB
@@ -128,8 +127,6 @@ int radeon_ib_schedule(struct radeon_device *rdev, struct radeon_ib *ib,
 {
 	struct radeon_ring *ring = &rdev->ring[ib->ring];
 	int r = 0;
-
-	radeon_gart_sync_all_for_device(rdev);
 
 	if (!ib->length_dw || !ring->ready) {
 		/* TODO: Nothings in the ib we should report. */

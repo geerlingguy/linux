@@ -538,42 +538,6 @@ void radeon_wb_fini(struct radeon_device *rdev)
 	}
 }
 
-//memset_io with only 32-bit accesses
-void memset_io_pcie_wb(volatile void __iomem *dst, int c, size_t count)
-{
-	u32 qc = (u8)c;
-
-	qc |= qc << 8;
-	qc |= qc << 16;
-	//qc |= qc << 32;
-	mb();
-
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
-
-	while (count && !IS_ALIGNED((unsigned long)dst, 8)) {
-		__raw_writeb(c, dst);
-		dst++;
-		count--;
-	}
-
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
-
-	while (count >= 4) {
-		__raw_writel(qc, dst);
-		dst += 4;
-		count -= 4;
-	}
-
-	printk(KERN_ALERT "DEBUG: Passed %s %d \n",__FUNCTION__,__LINE__); msleep(200);
-
-	while (count) {
-		__raw_writeb(c, dst);
-		dst++;
-		count--;
-	}
-}
-
-
 /**
  * radeon_wb_init- Init Writeback driver info and allocate memory
  *
@@ -618,7 +582,7 @@ int radeon_wb_init(struct radeon_device *rdev)
 	}
 
 	/* clear wb memory */
-	memset_io_pcie_wb((char *)rdev->wb.wb, 0, RADEON_GPU_PAGE_SIZE);
+	memset_io_pcie((char *)rdev->wb.wb, 0, RADEON_GPU_PAGE_SIZE);
 	/* disable event_write fences */
 	rdev->wb.use_event = false;
 	/* disabled via module param */

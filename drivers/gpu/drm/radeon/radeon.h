@@ -370,7 +370,6 @@ struct radeon_fence_driver {
 	atomic64_t			last_seq;
 	bool				initialized, delayed_irq;
 	struct delayed_work		lockup_work;
-	dma_addr_t			dma_addr;
 };
 
 struct radeon_fence {
@@ -668,8 +667,6 @@ int radeon_gart_bind(struct radeon_device *rdev, unsigned offset,
 		     int pages, struct page **pagelist,
 		     dma_addr_t *dma_addr, uint32_t flags);
 
-
-void radeon_gart_sync_all_for_device(struct radeon_device *rdev);
 
 /*
  * GPU MC structures, functions & helpers
@@ -2347,7 +2344,6 @@ struct radeon_atcs {
 typedef uint32_t (*radeon_rreg_t)(struct radeon_device*, uint32_t);
 typedef void (*radeon_wreg_t)(struct radeon_device*, uint32_t, uint32_t);
 
-
 struct radeon_device {
 	struct device			*dev;
 	struct drm_device		*ddev;
@@ -2493,9 +2489,6 @@ struct radeon_device {
 	/* tracking pinned memory */
 	u64 vram_pin_size;
 	u64 gart_pin_size;
-
-	// needed because of weird stuff
-	int numFSuses;
 };
 
 bool radeon_is_px(struct drm_device *dev);

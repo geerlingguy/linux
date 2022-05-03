@@ -2625,7 +2625,6 @@ u32 r600_gfx_get_rptr(struct radeon_device *rdev,
 	else
 		rptr = RREG32(R600_CP_RB_RPTR);
 
-	mb(); //CHANGED
 	return rptr;
 }
 
@@ -3702,7 +3701,7 @@ int r600_irq_init(struct radeon_device *rdev)
 	 */
 	interrupt_cntl &= ~IH_DUMMY_RD_OVERRIDE;
 	/* IH_REQ_NONSNOOP_EN=1 if ring is in non-cacheable memory, e.g., vram */
-	interrupt_cntl |= IH_REQ_NONSNOOP_EN;
+	interrupt_cntl &= ~IH_REQ_NONSNOOP_EN;
 	WREG32(INTERRUPT_CNTL, interrupt_cntl);
 
 	WREG32(IH_RB_BASE, rdev->ih.gpu_addr >> 8);
@@ -4039,10 +4038,8 @@ static u32 r600_get_ih_wptr(struct radeon_device *rdev)
 {
 	u32 wptr, tmp;
 
-	if (rdev->wb.enabled) {
+	if (rdev->wb.enabled)
 		wptr = le32_to_cpu(rdev->wb.wb[R600_WB_IH_WPTR_OFFSET/4]);
-		mb();
-	}
 	else
 		wptr = RREG32(IH_RB_WPTR);
 
