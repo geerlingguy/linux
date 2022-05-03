@@ -3484,7 +3484,7 @@ int r600_ih_ring_alloc(struct radeon_device *rdev)
 	if (rdev->ih.ring_obj == NULL) {
 		r = radeon_bo_create(rdev, rdev->ih.ring_size,
 				     PAGE_SIZE, true,
-				     RADEON_GEM_DOMAIN_VRAM, 0,
+				     RADEON_GEM_DOMAIN_GTT, 0,
 				     NULL, NULL, &rdev->ih.ring_obj);
 		if (r) {
 			DRM_ERROR("radeon: failed to create ih ring buffer (%d).\n", r);
@@ -3494,7 +3494,7 @@ int r600_ih_ring_alloc(struct radeon_device *rdev)
 		if (unlikely(r != 0))
 			return r;
 		r = radeon_bo_pin(rdev->ih.ring_obj,
-				  RADEON_GEM_DOMAIN_VRAM,
+				  RADEON_GEM_DOMAIN_GTT,
 				  &rdev->ih.gpu_addr);
 		if (r) {
 			radeon_bo_unreserve(rdev->ih.ring_obj);

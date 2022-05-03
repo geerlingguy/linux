@@ -415,7 +415,7 @@ int radeon_gem_userptr_ioctl(struct drm_device *dev, void *data,
 
 	/* create a gem object to contain this object in */
 	r = radeon_gem_object_create(rdev, args->size, 0,
-				     RADEON_GEM_DOMAIN_GTT, 0,
+				     RADEON_GEM_DOMAIN_CPU, 0,
 				     false, &gobj);
 	if (r)
 		goto handle_lockup;
@@ -439,7 +439,7 @@ int radeon_gem_userptr_ioctl(struct drm_device *dev, void *data,
 			goto release_object;
 		}
 
-		radeon_ttm_placement_from_domain(bo, RADEON_GEM_DOMAIN_VRAM);
+		radeon_ttm_placement_from_domain(bo, RADEON_GEM_DOMAIN_GTT);
 		r = ttm_bo_validate(&bo->tbo, &bo->placement, &ctx);
 		radeon_bo_unreserve(bo);
 		mmap_read_unlock(current->mm);
