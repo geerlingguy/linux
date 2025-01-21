@@ -94,7 +94,9 @@ void intel_vga_reset_io_mem(struct drm_i915_private *i915)
 	 * and error messages.
 	 */
 	vga_get_uninterruptible(pdev, VGA_RSRC_LEGACY_IO);
+#if defined(CONFIG_VGA_CONSOLE)
 	outb(inb(VGA_MIS_R), VGA_MIS_W);
+#endif
 	vga_put(pdev, VGA_RSRC_LEGACY_IO);
 }
 
