@@ -5,6 +5,8 @@
 
 #include "xe_guc.h"
 
+#include <linux/delay.h>
+
 #include <drm/drm_managed.h>
 
 #include <generated/xe_wa_oob.h>
@@ -719,6 +721,7 @@ static int __xe_guc_upload(struct xe_guc *guc)
 	ret = guc_xfer_rsa(guc);
 	if (ret)
 		goto out;
+	msleep(1 * 1000);
 	/*
 	 * Current uCode expects the code to be loaded at 8k; locations below
 	 * this are used for the stack.
@@ -944,6 +947,7 @@ int xe_guc_mmio_send_recv(struct xe_guc *guc, const u32 *request,
 		  GUC_HXG_TYPE_REQUEST);
 
 retry:
+	msleep(1 * 500);
 	/* Not in critical data-path, just do if else for GT type */
 	if (xe_gt_is_media_type(gt)) {
 		for (i = 0; i < len; ++i)
